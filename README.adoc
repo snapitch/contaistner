@@ -1,4 +1,4 @@
-= Contaistner
+= Contaistner image:https://travis-ci.org/snapitch/contaistner.svg?branch=master["Build Status", link="https://travis-ci.org/snapitch/contaistner"] image:https://codecov.io/github/snapitch/contaistner/coverage.svg?branch=master["Code coverage", link="image::https://codecov.io/github/snapitch/contaistner"]
 
 `contaistner` makes easy to launch Docker containers in Spring Boot integration tests.
 

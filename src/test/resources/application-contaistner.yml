@@ -1,0 +1,2 @@
+my:
+  property: localhost:${contaistner.services.redis-standard-yamls.bindings.6379/tcp}

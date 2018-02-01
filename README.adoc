@@ -1,0 +1,128 @@
+= Contaistner
+
+`contaistner` makes easy to launch Docker containers in Spring Boot integration tests.
+
+Principal features are :
+
+* run containers only from existing images container. No build or docker-compose.
+* provides mechanism to manage automatic ports bindings by generating properties.
+* links containers lifecycle to Spring application context lifecycle
+
+== Installation and getting started
+
+Add this dependency to your project. For exemple, in maven pom file :
+
+[source,xml]
+----
+<dependency>
+    <groupId>org.snapitch</groupId>
+    <artifactId>contaistner</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+</dependency>
+----
+
+By default, `spring-boot-docker` use two yamls for configuration :
+
+* `application-bootstrap-contaistner.yml` describe containers to launch with configuration inspired by `docker-compose` yaml syntax
+* `application-contaistner.yml` contains applicative properties that depends on containers data
+
+For example, to start a redis and expose port 6379 :
+
+.application-bootstrap-contaistner.yml
+[source,yaml]
+----
+contaistner:
+  serivces:
+    redis:
+      image: redis:latest
+      ports: 6379/tcp
+----
+
+And the applicative configuration can reference binding ports if you use this configuration :
+
+.application-contaistner.yml
+[source,yaml]
+----
+spring:
+  redis:
+    port: ${contaistner.services.redis.bindings.6379/tcp} // <1>
+----
+<1> Retrieve port binding automatically assign by docker of container port 6379.
+If docker binds container port 6379 to host port 32567, value of `spring.redis.port` will be `32567`.
+
+If docker binds container port 6379 to host port 32567, value of `spring.redis.port` will be `32567`.
+
+== Configuration of container
+
+Each container can be configure by properties.
+It is properties prefixed by `contaistner.services.<containerKey>` and is inspired by `docker-compose` yaml syntax.
+
+|===
+|Name |Description |Generated | Example
+
+|`id`
+|Container identifier (uuid)
+|yes
+|`f2276208f749`
+
+|`name`
+|Container name
+|yes
+|`inspiring_edison`
+
+|`image`
+|Container image. Identical to docker-compoase
+|no
+|`redis:latest`
+
+|`ports`
+|List of container ports to expose. Like to docker-compoase
+|no
+|`6379`, `6379/tcp`
+
+|`bindings.<port>`
+|Bindings of container ports to host ports
+|yes
+|`bindings.6379/tcp` = `32567`
+
+|`environment`
+|Container environment list. Identical to docker-compoase
+|no
+|
+
+|`entrypoint`
+|Container entrypoint list. Identical to docker-compoase
+|no
+|
+|===
+
+== Configuration examples
+
+=== Postgres
+
+.application-bootstrap-contaistner.yml
+[source,yaml]
+----
+contaistner:
+  services:
+    postgres-it:
+      image: postgres:10-alpine
+      ports:
+        - 5432/tcp
+      environment:
+        - POSTGRES_USER=user
+        - POSTGRES_PASSWORD=password
+        - POSTGRES_DB=db
+----
+
+.application-contaistner.yml
+[source,yaml]
+----
+spring:
+  datasource:
+    host: localhost
+    port: ${contaistner.services.postgres-it.bindings.5432/tcp}
+    username: user
+    password: password
+    database: db
+----

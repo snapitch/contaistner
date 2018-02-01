@@ -1,0 +1,5 @@
+contaistner:
+  services:
+    redis-standard-yamls:
+      image: redis:3.2.11
+      ports: 6379/tcp

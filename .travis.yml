@@ -1,0 +1,33 @@
+sudo: required
+dist: trusty
+language: java
+
+jdk:
+  - openjdk8
+
+services:
+  - docker
+
+cache:
+  directories:
+  - "$HOME/.cache"
+
+env:
+  matrix:
+    - DOCKER_VERSION=17.03.1~ce
+
+before_install:
+  # check what version of docker is installed beforehand
+  - dpkg -l | grep docker
+  # install the version of docker in the DOCKER_VERSION env var
+  - ./.travis.sh install_docker
+  # uncomment to double-check that the version/config is correct
+  # - ./.travis.sh dump_docker_config
+  - docker version
+  - docker info
+
+after_success:
+  # test coverage reporting
+  - bash <(curl -s https://codecov.io/bash)
+
+script: mvn clean cobertura:cobertura

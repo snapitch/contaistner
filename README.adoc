@@ -71,12 +71,12 @@ It is properties prefixed by `contaistner.services.<containerKey>` and is inspir
 |`inspiring_edison`
 
 |`image`
-|Container image. Identical to docker-compoase
+|Specify the image to start the container from. Can either be a repository/tag or a partial image ID. Identical to docker-compose
 |no
 |`redis:latest`
 
 |`ports`
-|List of container ports to expose. Like to docker-compoase
+|Expose ports. Like to docker-compose
 |no
 |`6379`, `6379/tcp`
 
@@ -86,43 +86,33 @@ It is properties prefixed by `contaistner.services.<containerKey>` and is inspir
 |`bindings.6379/tcp` = `32567`
 
 |`environment`
-|Container environment list. Identical to docker-compoase
+|Add environment variables. Identical to docker-compose
 |no
 |
 
 |`entrypoint`
-|Container entrypoint list. Identical to docker-compoase
+|Override the default entrypoint. Identical to docker-compose
 |no
 |
+
+|`tmpfs`
+|Mount a temporary file system inside the container. Can be a single value or a list. Identical to docker-compose
+|no
+|`/run`, `/tmp`
 |===
 
 == Configuration examples
 
-=== Postgres
+=== In memory Postgres
 
 .application-bootstrap-contaistner.yml
 [source,yaml]
 ----
-contaistner:
-  services:
-    postgres-it:
-      image: postgres:10-alpine
-      ports:
-        - 5432/tcp
-      environment:
-        - POSTGRES_USER=user
-        - POSTGRES_PASSWORD=password
-        - POSTGRES_DB=db
+include::src/test/resources/application-postgres-bootstrap-contaistner.yml[]
 ----
 
 .application-contaistner.yml
 [source,yaml]
 ----
-spring:
-  datasource:
-    host: localhost
-    port: ${contaistner.services.postgres-it.bindings.5432/tcp}
-    username: user
-    password: password
-    database: db
+include::src/test/resources/application-postgres-contaistner.yml[]
 ----

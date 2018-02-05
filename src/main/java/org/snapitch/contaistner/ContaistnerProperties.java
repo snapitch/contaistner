@@ -87,12 +87,12 @@ public class ContaistnerProperties implements ApplicationContextAware {
         private String name;
 
         /**
-         * Container image with version
+         * Specify the image to start the container from. Can either be a repository/tag or a partial image ID.
          */
         private String image;
 
         /**
-         * Container ports to expose
+         * Expose ports.
          */
         private List<String> ports = new ArrayList<>();
 
@@ -102,17 +102,22 @@ public class ContaistnerProperties implements ApplicationContextAware {
         private Map<String, String> bindings = new HashMap<>();
 
         /**
-         * Container environment variables
+         * Add environment variables
          */
         private List<String> environment = new ArrayList<>();
 
         /**
-         * Container startup command
+         * Mount a temporary file system inside the container. Can be a single value or a list.
+         */
+        private List<String> tmpfs = new ArrayList<>();
+
+        /**
+         * Override the default command.
          */
         private List<String> cmd;
 
         /**
-         * Container entry point
+         * Override the default entrypoint.
          */
         private List<String> entrypoint;
 

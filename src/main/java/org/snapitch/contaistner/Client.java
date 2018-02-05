@@ -23,7 +23,7 @@ class Client implements Closeable {
 
     Client() {
         try {
-            this.client = DefaultDockerClient.fromEnv().build();
+            client = DefaultDockerClient.fromEnv().build();
 
         } catch (DockerCertificateException e) {
             throw new IllegalStateException("Unable to create docker client", e);
@@ -32,7 +32,7 @@ class Client implements Closeable {
 
     @Override
     public void close() {
-        this.client.close();
+        client.close();
     }
 
     public ContainerInfo startContainer(ContaistnerProperties.Service serviceProperties) {
@@ -50,21 +50,21 @@ class Client implements Closeable {
 
     private void pullImage(String image) throws DockerException, InterruptedException {
         try {
-            this.client.inspectImage(image);
+            client.inspectImage(image);
 
         } catch (ImageNotFoundException e) {
             LOGGER.info("Pull image {}", image);
-            this.client.pull(image);
+            client.pull(image);
         }
     }
 
     private ContainerCreation createAndStartContainer(ContaistnerProperties.Service properties)
             throws DockerException, InterruptedException {
 
-        ContainerCreation container = this.client.createContainer(
+        ContainerCreation container = client.createContainer(
                 createContainerProperties(properties));
 
-        this.client.startContainer(container.id());
+        client.startContainer(container.id());
         return container;
     }
 
@@ -76,11 +76,22 @@ class Client implements Closeable {
                 .cmd(properties.getCmd())
                 .entrypoint(properties.getEntrypoint())
                 .networkDisabled(false)
-                .hostConfig(createHostConfig(properties.getPortsAsArray())).build();
+                .hostConfig(createHostConfig(properties)).build();
     }
 
-    private HostConfig createHostConfig(String[] ports) {
-        return HostConfig.builder().portBindings(createPortBindings(ports)).build();
+    private HostConfig createHostConfig(ContaistnerProperties.Service properties) {
+        return HostConfig.builder()
+                .tmpfs(createTmpFs(properties.getTmpfs()))
+                .portBindings(createPortBindings(properties.getPortsAsArray())).build();
+    }
+
+    private Map<String, String> createTmpFs(List<String> tmpfs) {
+        Map<String, String> tmpFsMap = new HashMap<>();
+        for (String value : tmpfs) {
+            String[] splittedValue = value.split(":");
+            tmpFsMap.put(splittedValue[0], (splittedValue.length >= 2 ? splittedValue[1] : ""));
+        }
+        return tmpFsMap;
     }
 
     private Map<String, List<PortBinding>> createPortBindings(final String[] exposedPorts) {

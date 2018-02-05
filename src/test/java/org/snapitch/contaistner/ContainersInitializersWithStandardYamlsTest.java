@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.PropertyResolver;
 import org.springframework.test.context.ContextConfiguration;
@@ -48,7 +49,7 @@ public class ContainersInitializersWithStandardYamlsTest {
         assertThat("Property " + property , propertyResolver.getProperty(property), matcher);
     }
 
-    @SpringBootApplication
+    @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
     public static class Application {
 
         public static void main(String[] args) {

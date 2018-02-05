@@ -1,0 +1,11 @@
+contaistner:
+  services:
+    postgres-it:
+      image: postgres:10-alpine
+      ports:
+        - 5432/tcp
+      environment:
+        - POSTGRES_USER=user
+        - POSTGRES_PASSWORD=password
+        - POSTGRES_DB=db
+      wait-delay: 5

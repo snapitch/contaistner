@@ -116,6 +116,11 @@ public class ContaistnerProperties implements ApplicationContextAware {
          */
         private List<String> entrypoint;
 
+        /**
+         * Delay in seconds to wait after container start
+         */
+        private int waitDelay = 0;
+
         public String[] getPortsAsArray() {
             return this.getPorts().toArray(new String[this.getPorts().size()]);
         }

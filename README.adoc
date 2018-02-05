@@ -1,4 +1,4 @@
-= Contaistner image:https://travis-ci.org/snapitch/contaistner.svg?branch=master["Build Status", link="https://travis-ci.org/snapitch/contaistner"] image:https://codecov.io/github/snapitch/contaistner/coverage.svg?branch=master["Code coverage", link="image::https://codecov.io/github/snapitch/contaistner"]
+= Contaistner image:https://img.shields.io/badge/License-MIT-yellow.svg["License", link="https://opensource.org/licenses/MIT"] image:https://travis-ci.org/snapitch/contaistner.svg?branch=master["Build Status", link="https://travis-ci.org/snapitch/contaistner"] image:https://codecov.io/github/snapitch/contaistner/coverage.svg?branch=master["Code coverage", link="image::https://codecov.io/github/snapitch/contaistner"]
 
 `contaistner` makes easy to launch Docker containers in Spring Boot integration tests.
 
@@ -15,7 +15,7 @@ Add this dependency to your project. For exemple, in maven pom file :
 [source,xml]
 ----
 <dependency>
-    <groupId>org.snapitch</groupId>
+    <groupId>io.github.snapitch</groupId>
     <artifactId>contaistner</artifactId>
     <version>0.0.1-SNAPSHOT</version>
 </dependency>

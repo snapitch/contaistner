@@ -9,8 +9,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.PropertyResolver;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.hamcrest.Matchers.is;
@@ -20,9 +20,7 @@ import static org.junit.Assert.assertThat;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ContextConfiguration(classes = ContainersInitializersWithStandardYamlsTest.Application.class)
-@TestPropertySource(
-        properties = {"my.context=ContainersInitializersWithStandardYamlsTest"}
-)
+@ActiveProfiles("standard-yaml")
 public class ContainersInitializersWithStandardYamlsTest {
 
     @Autowired
@@ -30,19 +28,19 @@ public class ContainersInitializersWithStandardYamlsTest {
 
     @Test
     public void addBootstrapPropertiesToEnvironment() {
-        assertProperty("contaistner.services.redis-standard-yamls.image", is("redis:3.2.11"));
+        assertProperty("contaistner.services.redis-it.image", is("redis:3.2.11"));
     }
 
     @Test
     public void addGeneratedPropertiesToEnvironment() {
-        assertProperty("contaistner.services.redis-standard-yamls.id", notNullValue());
-        assertProperty("contaistner.services.redis-standard-yamls.name", notNullValue());
-        assertProperty("contaistner.services.redis-standard-yamls.bindings.6379/tcp", notNullValue());
+        assertProperty("contaistner.services.redis-it.id", notNullValue());
+        assertProperty("contaistner.services.redis-it.name", notNullValue());
+        assertProperty("contaistner.services.redis-it.bindings.6379/tcp", notNullValue());
     }
 
     @Test
     public void addApplicationPropertiesWithGeneratedPropertiesReplacement() {
-        assertProperty("my.property", is("localhost:" + propertyResolver.getProperty("contaistner.services.redis-standard-yamls.bindings.6379/tcp")));
+        assertProperty("my.property", is("localhost:" + propertyResolver.getProperty("contaistner.services.redis-it.bindings.6379/tcp")));
     }
 
     private void assertProperty(String property, Matcher<Object> matcher) {

@@ -22,7 +22,6 @@ import java.util.Properties;
 public class ContainersFactorySpringApplicationRunListener implements SpringApplicationRunListener {
 
     private static final String PROPERTIES_PREFIX = "contaistner";
-    private static final String BOOTSTRAP_PROPERTY_SOURCE_NAME = "Docker bootstrap";
     private static final String GENERATED_PROPERTY_SOURCE_NAME = "Docker generated";
     private static final String APPLICATIVE_PROPERTY_SOURCE_NAME = "Docker applicative";
 
@@ -44,38 +43,14 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
     public void contextPrepared(ConfigurableApplicationContext context) {
         MutablePropertySources propertySources = context.getEnvironment().getPropertySources();
 
-        ContaistnerProperties contaistnerProperties = getPropertiesFromBootstrapFile(context);
+        ContaistnerProperties contaistnerProperties = getDockerProperties(context);
         if (!contaistnerProperties.getServices().isEmpty()) {
             startContainersAndGenerateProperties(contaistnerProperties,propertySources);
             loadApplicativeConfiguration(contaistnerProperties, propertySources);
         }
     }
 
-    private ContaistnerProperties getPropertiesFromBootstrapFile(ConfigurableApplicationContext applicationContext) {
-
-        try {
-            ContaistnerProperties standardProperties = getDockerProperties(applicationContext);
-            Resource bootstrapResource = standardProperties.getBootstrapResource();
-
-            if(bootstrapResource.exists()) {
-                applicationContext.getEnvironment().getPropertySources()
-                        .addFirst(createYamlPropertySource(BOOTSTRAP_PROPERTY_SOURCE_NAME, bootstrapResource));
-
-                // Reload docker properties in order to get properties from bootstrap resource
-                return getDockerProperties(applicationContext);
-
-            } else {
-                // Return docker properties from standard properties
-                return standardProperties;
-            }
-
-        } catch (Exception e) {
-            throw new IllegalStateException("Impossible to load bootstrap configuration", e);
-        }
-    }
-
     private ContaistnerProperties getDockerProperties(ConfigurableApplicationContext applicationContext) {
-
         ContaistnerProperties properties = new ContaistnerProperties();
         properties.setApplicationContext(applicationContext);
         RelaxedDataBinder dataBinder = new RelaxedDataBinder(properties, PROPERTIES_PREFIX);

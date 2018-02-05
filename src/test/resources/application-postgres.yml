@@ -1,4 +1,5 @@
 contaistner:
+  application-file: classpath:application-postgres-contaistner.yml
   services:
     postgres-it:
       image: postgres:10-alpine

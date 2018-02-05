@@ -23,12 +23,28 @@ Add this dependency to your project. For exemple, in maven pom file :
 
 By default, `spring-boot-docker` use two yamls for configuration :
 
-* `application-bootstrap-contaistner.yml` describe containers to launch with configuration inspired by `docker-compose` yaml syntax
+* `application-<active-profile>.yml` describe containers to launch with configuration inspired by `docker-compose` yaml syntax
 * `application-contaistner.yml` contains applicative properties that depends on containers data
 
 For example, to start a redis and expose port 6379 :
 
-.application-bootstrap-contaistner.yml
+.IntegrationTest.java
+[source,java]
+----
+@RunWith(SpringRunner.class)
+@SpringBootTest
+@ActiveProfiles("test") // <1>
+public class IntegrationTest {
+
+    @Test
+    public void myTest() {
+        ...
+    }
+}
+----
+<1> Active profile in order to load contaistner boostrap properties
+
+.application-test.yml
 [source,yaml]
 ----
 contaistner:

@@ -20,11 +20,6 @@ public class ContaistnerProperties implements ApplicationContextAware {
     private ConfigurableApplicationContext applicationContext;
 
     /**
-     * Configuration file that describe containers to start
-     */
-    private String bootstrapFile = "classpath:application-bootstrap-contaistner.yml";
-
-    /**
      * Configuration file that contains applicative properties that depends on containers dynamic information (eq port...)
      */
     private String applicationFile = "classpath:application-contaistner.yml";
@@ -33,10 +28,6 @@ public class ContaistnerProperties implements ApplicationContextAware {
      * Configuration of containers
      */
     private Map<String, Service> services = new HashMap<>();
-
-    public Resource getBootstrapResource() {
-        return applicationContext.getResource(bootstrapFile);
-    }
 
     public Resource getApplicationResource() {
         return applicationContext.getResource(applicationFile);
@@ -48,14 +39,6 @@ public class ContaistnerProperties implements ApplicationContextAware {
                 "Docker containers need ConfigurableApplicationContext");
 
         this.applicationContext = (ConfigurableApplicationContext) applicationContext;
-    }
-
-    public String getBootstrapFile() {
-        return bootstrapFile;
-    }
-
-    public void setBootstrapFile(String bootstrapFile) {
-        this.bootstrapFile = bootstrapFile;
     }
 
     public String getApplicationFile() {

@@ -104,6 +104,7 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
             LOGGER.info("Run container {} with image {}", containerKey, serviceProperties.getImage());
 
             ContainerInfo containerInfo = startContainer(serviceProperties);
+            waitingContainerStart(serviceProperties);
             addGeneratedProperties(generatedProperties, containerKey, containerInfo);
 
             LOGGER.info("Container {} is running and properties is overloaded", containerKey);
@@ -117,6 +118,15 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
     private ContainerInfo startContainer(ContaistnerProperties.Service serviceProperties) {
         try (Client client = new Client()) {
             return client.startContainer(serviceProperties);
+        }
+    }
+
+    private void waitingContainerStart(ContaistnerProperties.Service serviceProperties) {
+        if(serviceProperties.getWaitDelay() > 0) {
+            try {
+                Thread.sleep(serviceProperties.getWaitDelay() * 1000L);
+            } catch (InterruptedException ignored) {
+            }
         }
     }
 
@@ -176,16 +186,10 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
 
     @Override
     public void finished(ConfigurableApplicationContext context, Throwable exception) {
-        ContaistnerProperties properties = getDockerProperties(context);
-
-        for (String containerKey : properties.getServices().keySet()) {
-            ContaistnerProperties.Service serviceProperties = properties.getServices().get(containerKey);
-            if(serviceProperties.getId() != null) {
-                try (Client client = new Client()) {
-                    LOGGER.info("Stop container {}" , containerKey);
-                    client.stopContainer(serviceProperties.getId());
-                }
-            }
+        boolean isApplicationContextLoadingFails = exception != null;
+        if(isApplicationContextLoadingFails) {
+            ContaistnerProperties properties = getDockerProperties(context);
+            new ContainersRemover(properties).removeContainers();
         }
     }
 }

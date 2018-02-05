@@ -1,2 +1,5 @@
 org.springframework.boot.SpringApplicationRunListener=\
 org.snapitch.contaistner.ContainersFactorySpringApplicationRunListener
+
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+org.snapitch.contaistner.ContaistnerAutoConfiguration

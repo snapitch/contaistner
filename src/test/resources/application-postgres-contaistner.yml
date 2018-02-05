@@ -1,0 +1,5 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:${contaistner.services.postgres-it.bindings.5432/tcp}/db
+    username: user
+    password: password

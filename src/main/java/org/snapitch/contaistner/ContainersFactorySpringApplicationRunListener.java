@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 
 import static java.lang.Integer.parseInt;
 import static java.util.concurrent.TimeUnit.SECONDS;
@@ -48,15 +49,19 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
 
     @Override
     public void contextPrepared(ConfigurableApplicationContext context) {
-        MutablePropertySources propertySources = context.getEnvironment().getPropertySources();
+        try {
+            MutablePropertySources propertySources = context.getEnvironment().getPropertySources();
+            ContaistnerProperties properties = getContaistnerProperties(context);
+            if (!properties.getServices().isEmpty()) {
+                startContainersAndGenerateProperties(properties, propertySources);
+                loadApplicativeConfiguration(properties, propertySources);
+            }
 
-        ContaistnerProperties properties = getContaistnerProperties(context);
-        if (!properties.getServices().isEmpty()) {
-            startContainersAndGenerateProperties(properties, propertySources);
-            loadApplicativeConfiguration(properties, propertySources);
+            waitingContainersReadiness(context);
+
+        } catch (Exception e) {
+            throw new ContaistnerException("Impossible to start containers", e);
         }
-
-        waitingContainersReadiness(context);
     }
 
     private void waitingContainersReadiness(ConfigurableApplicationContext applicationContext) {
@@ -67,16 +72,41 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
             ContaistnerProperties.Service properties = service.getValue();
 
             waitingMinimumDelay(properties);
+            waitingPortsAccessibility(service, properties);
+            waitingLog(service, properties);
+        }
+    }
 
-            for (Entry<String, String> bindings : properties.getBindings().entrySet()) {
+    private void waitingLog(Entry<String, ContaistnerProperties.Service> service, ContaistnerProperties.Service properties) {
+        if (properties.getReadiness().getWaitingLogLine() != null) {
+            LOGGER.info("Waiting log line '{}' for service {}", properties.getReadiness().getWaitingLogLine(), service.getKey());
+            try (Client client = new Client()) {
+                Thread thread = client.listenLogs(properties.getId(), isLogLinePresent(properties));
                 await().atMost(properties.getReadiness().getMaxWaitingDelay(), SECONDS)
-                        .until(isPortAccessible(service.getKey(), parseInt(bindings.getValue())));
+                        .until(() -> !thread.isAlive());
+
+                LOGGER.info("Log line containing'{}' is found", properties.getReadiness().getWaitingLogLine());
             }
         }
     }
 
+    private Consumer<String> isLogLinePresent(ContaistnerProperties.Service properties) {
+        return logLine -> {
+            if (logLine.contains(properties.getReadiness().getWaitingLogLine())) {
+                throw new RuntimeException("Log line matching is found");
+            }
+        };
+    }
+
+    private void waitingPortsAccessibility(Entry<String, ContaistnerProperties.Service> service, ContaistnerProperties.Service properties) {
+        for (Entry<String, String> bindings : properties.getBindings().entrySet()) {
+            await().atMost(properties.getReadiness().getMaxWaitingDelay(), SECONDS)
+                    .until(isPortAccessible(service.getKey(), parseInt(bindings.getValue())));
+        }
+    }
+
     private void waitingMinimumDelay(ContaistnerProperties.Service properties) {
-        if(properties.getReadiness().getMinWaitingDelay() != 0) {
+        if (properties.getReadiness().getMinWaitingDelay() != 0) {
             try {
                 Thread.sleep(properties.getReadiness().getMinWaitingDelay() * 1000L);
             } catch (InterruptedException ignored) {

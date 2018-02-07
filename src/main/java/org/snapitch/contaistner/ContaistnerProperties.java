@@ -125,5 +125,10 @@ public class ContaistnerProperties implements ApplicationContextAware {
          * Maximum delay in seconds waiting container is ready.
          */
         private long maxWaitingDelay = 10;
+
+        /**
+         * Log indicate that container is ready.
+         */
+        private String waitingLogLine;
     }
 }

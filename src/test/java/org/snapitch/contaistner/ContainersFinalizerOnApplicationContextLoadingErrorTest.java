@@ -14,7 +14,7 @@ public class ContainersFinalizerOnApplicationContextLoadingErrorTest {
         try {
             SpringApplication.run(Application.class);
         } catch (Exception e) {
-            e.printStackTrace();
+            // TODO check no container is running
         }
     }
 

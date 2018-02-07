@@ -13,9 +13,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@ContextConfiguration(classes = PostgresContainersTest.Application.class)
+@ContextConfiguration(classes = PostgresTest.Application.class)
 @ActiveProfiles("postgres")
-public class PostgresContainersTest {
+public class PostgresTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -29,7 +29,7 @@ public class PostgresContainersTest {
     public static class Application {
 
         public static void main(String[] args) {
-            SpringApplication.run(PostgresContainersTest.Application.class, args);
+            SpringApplication.run(PostgresTest.Application.class, args);
         }
     }
 }

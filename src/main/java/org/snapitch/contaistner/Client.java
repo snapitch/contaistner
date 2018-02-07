@@ -9,9 +9,8 @@ import com.spotify.docker.client.messages.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.Closeable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Consumer;
 
 import static com.spotify.docker.client.messages.PortBinding.randomPort;
 import static java.util.Collections.singletonList;
@@ -140,5 +139,12 @@ class Client implements Closeable {
         } catch (Exception e) {
             LOGGER.warn("Impossible to remove container {}", containerInfo.name());
         }
+    }
+
+    public Thread listenLogs(String containerId, Consumer<String> logConsumer) {
+        LogsListener logsListener = new LogsListener(client, containerId, logConsumer);
+        Thread thread = new Thread(logsListener::listenLogs);
+        thread.start();
+        return thread;
     }
 }

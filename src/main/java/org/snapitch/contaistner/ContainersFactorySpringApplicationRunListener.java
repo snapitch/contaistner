@@ -29,7 +29,7 @@ import static org.snapitch.contaistner.ContaistnerPropertiesFactory.createFromAp
 @Slf4j
 public class ContainersFactorySpringApplicationRunListener implements SpringApplicationRunListener {
 
-    private static final String GENERATED_PROPERTY_SOURCE_NAME = "Docker generated";
+    public static final String GENERATED_PROPERTY_SOURCE_NAME = "Docker generated";
     private static final String APPLICATIVE_PROPERTY_SOURCE_NAME = "Docker applicative";
 
     public ContainersFactorySpringApplicationRunListener(SpringApplication application, String[] args) {
@@ -219,8 +219,7 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
     public void finished(ConfigurableApplicationContext context, Throwable exception) {
         boolean isApplicationContextLoadingFails = exception != null;
         if (isApplicationContextLoadingFails) {
-            ContaistnerProperties properties = createFromApplicationContext(context);
-            new ContainersRemover(properties).removeContainers();
+            new ContainersRemover(context).removeContainers();
         }
     }
 }

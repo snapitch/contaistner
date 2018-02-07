@@ -17,7 +17,7 @@ Add this dependency to your project. For exemple, in maven pom file :
 <dependency>
     <groupId>io.github.snapitch</groupId>
     <artifactId>contaistner</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.1</version>
 </dependency>
 ----
 

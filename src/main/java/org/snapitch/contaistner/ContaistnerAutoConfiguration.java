@@ -1,6 +1,7 @@
 package org.snapitch.contaistner;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -9,8 +10,8 @@ import org.springframework.context.annotation.Configuration;
 public class ContaistnerAutoConfiguration {
 
     @Bean
-    public ContextClosedEventListener contaistnerContextClosedEventListener(ContaistnerProperties properties) {
-        return new ContextClosedEventListener(properties);
+    public ContextClosedEventListener contaistnerContextClosedEventListener(ConfigurableApplicationContext applicationContext) {
+        return new ContextClosedEventListener(applicationContext);
     }
 
     @Bean

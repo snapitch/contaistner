@@ -15,6 +15,9 @@ import java.util.function.Consumer;
 import static com.spotify.docker.client.messages.PortBinding.randomPort;
 import static java.util.Collections.singletonList;
 
+/**
+ * Facade for {@link DockerClient}
+ */
 @Slf4j
 class Client implements Closeable {
 
@@ -81,23 +84,30 @@ class Client implements Closeable {
     private HostConfig createHostConfig(ContaistnerProperties.Service properties) {
         return HostConfig.builder()
                 .tmpfs(createTmpFs(properties.getTmpfs()))
-                .portBindings(createPortBindings(properties.getPortsAsArray())).build();
+                .portBindings(createPortBindings(properties)).build();
     }
 
     private Map<String, String> createTmpFs(List<String> tmpfs) {
         Map<String, String> tmpFsMap = new HashMap<>();
         for (String value : tmpfs) {
-            String[] splittedValue = value.split(":");
-            tmpFsMap.put(splittedValue[0], (splittedValue.length >= 2 ? splittedValue[1] : ""));
+            String[] splitValue = value.split(":");
+            tmpFsMap.put(splitValue[0], (splitValue.length >= 2 ? splitValue[1] : ""));
         }
         return tmpFsMap;
     }
 
-    private Map<String, List<PortBinding>> createPortBindings(final String[] exposedPorts) {
+    private Map<String, List<PortBinding>> createPortBindings(ContaistnerProperties.Service properties) {
         final Map<String, List<PortBinding>> portBindings = new HashMap<>();
-        if (exposedPorts != null) {
-            for (final String port : exposedPorts) {
-                final List<PortBinding> hostPorts = singletonList(randomPort("0.0.0.0"));
+        String[] portsArray = properties.getPortsAsArray();
+        if (portsArray != null) {
+            for (final String port : portsArray) {
+                final List<PortBinding> hostPorts;
+                if (properties.getBindings().get(port) == null) {
+                    hostPorts = singletonList(randomPort("0.0.0.0"));
+                } else {
+                    hostPorts = singletonList(PortBinding.of("0.0.0.0", properties.getBindings().get(port)));
+                }
+
                 portBindings.put(port, hostPorts);
             }
         }

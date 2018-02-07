@@ -3,3 +3,6 @@ org.snapitch.contaistner.ContainersFactorySpringApplicationRunListener
 
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
 org.snapitch.contaistner.ContaistnerAutoConfiguration
+
+org.springframework.test.context.TestExecutionListener=\
+org.snapitch.contaistner.DirtiesContainerTestExecutionListener

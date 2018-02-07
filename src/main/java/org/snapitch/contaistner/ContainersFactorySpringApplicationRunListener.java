@@ -6,8 +6,6 @@ import com.spotify.docker.client.messages.PortBinding;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.SpringApplicationRunListener;
-import org.springframework.boot.bind.PropertySourcesPropertyValues;
-import org.springframework.boot.bind.RelaxedDataBinder;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.*;
@@ -25,11 +23,12 @@ import java.util.function.Consumer;
 import static java.lang.Integer.parseInt;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
+import static org.snapitch.contaistner.ContaistnerPropertiesFactory.PROPERTIES_PREFIX;
+import static org.snapitch.contaistner.ContaistnerPropertiesFactory.createFromApplicationContext;
 
 @Slf4j
 public class ContainersFactorySpringApplicationRunListener implements SpringApplicationRunListener {
 
-    private static final String PROPERTIES_PREFIX = "contaistner";
     private static final String GENERATED_PROPERTY_SOURCE_NAME = "Docker generated";
     private static final String APPLICATIVE_PROPERTY_SOURCE_NAME = "Docker applicative";
 
@@ -51,7 +50,7 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
     public void contextPrepared(ConfigurableApplicationContext context) {
         try {
             MutablePropertySources propertySources = context.getEnvironment().getPropertySources();
-            ContaistnerProperties properties = getContaistnerProperties(context);
+            ContaistnerProperties properties = createFromApplicationContext(context);
             if (!properties.getServices().isEmpty()) {
                 startContainersAndGenerateProperties(properties, propertySources);
                 loadApplicativeConfiguration(properties, propertySources);
@@ -66,7 +65,7 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
 
     private void waitingContainersReadiness(ConfigurableApplicationContext applicationContext) {
         // Reload properties in order to have generated ones
-        ContaistnerProperties contaistnerProperties = getContaistnerProperties(applicationContext);
+        ContaistnerProperties contaistnerProperties = createFromApplicationContext(applicationContext);
 
         for (Entry<String, ContaistnerProperties.Service> service : contaistnerProperties.getServices().entrySet()) {
             ContaistnerProperties.Service properties = service.getValue();
@@ -123,14 +122,6 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
                 return false;
             }
         };
-    }
-
-    private ContaistnerProperties getContaistnerProperties(ConfigurableApplicationContext applicationContext) {
-        ContaistnerProperties properties = new ContaistnerProperties();
-        properties.setApplicationContext(applicationContext);
-        RelaxedDataBinder dataBinder = new RelaxedDataBinder(properties, PROPERTIES_PREFIX);
-        dataBinder.bind(new PropertySourcesPropertyValues(applicationContext.getEnvironment().getPropertySources()));
-        return properties;
     }
 
     private PropertySource<?> createYamlPropertySource(String name, Resource yamlResource) throws IOException {
@@ -228,7 +219,7 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
     public void finished(ConfigurableApplicationContext context, Throwable exception) {
         boolean isApplicationContextLoadingFails = exception != null;
         if (isApplicationContextLoadingFails) {
-            ContaistnerProperties properties = getContaistnerProperties(context);
+            ContaistnerProperties properties = createFromApplicationContext(context);
             new ContainersRemover(properties).removeContainers();
         }
     }

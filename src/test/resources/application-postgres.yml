@@ -11,5 +11,7 @@ contaistner:
         - POSTGRES_DB=db
       tmpfs:
         - /var/lib/postgresql/data
+      logging: true
       readiness:
+        min-waiting-delay: 1
         waiting-log-line: database system is ready to accept connections

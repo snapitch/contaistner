@@ -109,6 +109,16 @@ public class ContaistnerProperties implements ApplicationContextAware {
          */
         private Readiness readiness = new Readiness();
 
+        /**
+         * Log containers logs
+         */
+        private boolean logging = false;
+
+        /**
+         * Stop and remove containers at integration test ending
+         */
+        private boolean stopAndRemove = true;
+
         public String[] getPortsAsArray() {
             return this.getPorts().toArray(new String[this.getPorts().size()]);
         }

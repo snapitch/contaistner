@@ -9,7 +9,6 @@ contaistner:
         - POSTGRES_USER=user
         - POSTGRES_PASSWORD=password
         - POSTGRES_DB=db
-      tmpfs:
-        - /var/lib/postgresql/data
       readiness:
-        waiting-log-line: database system is ready to accept connections
+        maxWaitingDelay: 2
+        waiting-log-line: unknown log

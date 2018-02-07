@@ -12,4 +12,9 @@ public class ContaistnerAutoConfiguration {
     public ContextClosedEventListener contaistnerContextClosedEventListener(ContaistnerProperties properties) {
         return new ContextClosedEventListener(properties);
     }
+
+    @Bean
+    public ContainersLogger containersLogger() {
+        return new ContainersLogger();
+    }
 }

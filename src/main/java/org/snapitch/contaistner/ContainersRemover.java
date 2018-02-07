@@ -12,7 +12,7 @@ public class ContainersRemover {
     public void removeContainers() {
         for (String containerKey : properties.getServices().keySet()) {
             ContaistnerProperties.Service serviceProperties = properties.getServices().get(containerKey);
-            if (serviceProperties.getId() != null) {
+            if (serviceProperties.getId() != null && serviceProperties.isStopAndRemove()) {
                 try (Client client = new Client()) {
                     LOGGER.info("Stop container {}", containerKey);
                     client.stopContainer(serviceProperties.getId());

@@ -11,4 +11,5 @@ contaistner:
         - POSTGRES_DB=db
       tmpfs:
         - /var/lib/postgresql/data
-      wait-delay: 5
+      readiness:
+        min-waiting-delay: 5

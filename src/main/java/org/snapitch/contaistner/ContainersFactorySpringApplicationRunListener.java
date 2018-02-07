@@ -14,9 +14,16 @@ import org.springframework.core.env.*;
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
+import java.net.Socket;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.concurrent.Callable;
+
+import static java.lang.Integer.parseInt;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
 
 @Slf4j
 public class ContainersFactorySpringApplicationRunListener implements SpringApplicationRunListener {
@@ -43,14 +50,52 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
     public void contextPrepared(ConfigurableApplicationContext context) {
         MutablePropertySources propertySources = context.getEnvironment().getPropertySources();
 
-        ContaistnerProperties contaistnerProperties = getDockerProperties(context);
-        if (!contaistnerProperties.getServices().isEmpty()) {
-            startContainersAndGenerateProperties(contaistnerProperties,propertySources);
-            loadApplicativeConfiguration(contaistnerProperties, propertySources);
+        ContaistnerProperties properties = getContaistnerProperties(context);
+        if (!properties.getServices().isEmpty()) {
+            startContainersAndGenerateProperties(properties, propertySources);
+            loadApplicativeConfiguration(properties, propertySources);
+        }
+
+        waitingContainersReadiness(context);
+    }
+
+    private void waitingContainersReadiness(ConfigurableApplicationContext applicationContext) {
+        // Reload properties in order to have generated ones
+        ContaistnerProperties contaistnerProperties = getContaistnerProperties(applicationContext);
+
+        for (Entry<String, ContaistnerProperties.Service> service : contaistnerProperties.getServices().entrySet()) {
+            ContaistnerProperties.Service properties = service.getValue();
+
+            waitingMinimumDelay(properties);
+
+            for (Entry<String, String> bindings : properties.getBindings().entrySet()) {
+                await().atMost(properties.getReadiness().getMaxWaitingDelay(), SECONDS)
+                        .until(isPortAccessible(service.getKey(), parseInt(bindings.getValue())));
+            }
         }
     }
 
-    private ContaistnerProperties getDockerProperties(ConfigurableApplicationContext applicationContext) {
+    private void waitingMinimumDelay(ContaistnerProperties.Service properties) {
+        if(properties.getReadiness().getMinWaitingDelay() != 0) {
+            try {
+                Thread.sleep(properties.getReadiness().getMinWaitingDelay() * 1000L);
+            } catch (InterruptedException ignored) {
+            }
+        }
+    }
+
+    private Callable<Boolean> isPortAccessible(String serviceName, int port) {
+        return () -> {
+            LOGGER.debug("Check port {} accessibility for service {}", port, serviceName);
+            try (final Socket ignored = new Socket("localhost", port)) {
+                return true;
+            } catch (IOException e) {
+                return false;
+            }
+        };
+    }
+
+    private ContaistnerProperties getContaistnerProperties(ConfigurableApplicationContext applicationContext) {
         ContaistnerProperties properties = new ContaistnerProperties();
         properties.setApplicationContext(applicationContext);
         RelaxedDataBinder dataBinder = new RelaxedDataBinder(properties, PROPERTIES_PREFIX);
@@ -60,7 +105,7 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
 
     private PropertySource<?> createYamlPropertySource(String name, Resource yamlResource) throws IOException {
         PropertySource<?> propertySource = new YamlPropertySourceLoader().load(name, yamlResource, null);
-        if(propertySource == null) {
+        if (propertySource == null) {
             LOGGER.warn("Empty {}", yamlResource);
             propertySource = new MapPropertySource(name, new HashMap<>());
         }
@@ -79,7 +124,6 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
             LOGGER.info("Run container {} with image {}", containerKey, serviceProperties.getImage());
 
             ContainerInfo containerInfo = startContainer(serviceProperties);
-            waitingContainerStart(serviceProperties);
             addGeneratedProperties(generatedProperties, containerKey, containerInfo);
 
             LOGGER.info("Container {} is running and properties is overloaded", containerKey);
@@ -93,15 +137,6 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
     private ContainerInfo startContainer(ContaistnerProperties.Service serviceProperties) {
         try (Client client = new Client()) {
             return client.startContainer(serviceProperties);
-        }
-    }
-
-    private void waitingContainerStart(ContaistnerProperties.Service serviceProperties) {
-        if(serviceProperties.getWaitDelay() > 0) {
-            try {
-                Thread.sleep(serviceProperties.getWaitDelay() * 1000L);
-            } catch (InterruptedException ignored) {
-            }
         }
     }
 
@@ -119,10 +154,10 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
                                                    ContainerInfo containerInfo) {
 
         ImmutableMap<String, List<PortBinding>> ports = containerInfo.networkSettings().ports();
-        if(ports != null) {
+        if (ports != null) {
             for (String port : ports.keySet()) {
                 int bindingPort = getPort(ports.get(port));
-                if(bindingPort != -1) {
+                if (bindingPort != -1) {
                     properties.put(PROPERTIES_PREFIX + ".services." + containerKey + ".bindings." + port, bindingPort);
                 }
             }
@@ -132,7 +167,7 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
     private int getPort(List<PortBinding> portBindings) {
         if (portBindings != null && !portBindings.isEmpty()) {
             final PortBinding firstBinding = portBindings.get(0);
-            return Integer.parseInt(firstBinding.hostPort());
+            return parseInt(firstBinding.hostPort());
         }
 
         return -1;
@@ -142,7 +177,7 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
                                               MutablePropertySources propertySources) {
 
         Resource applicationResource = contaistnerProperties.getApplicationResource();
-        if(applicationResource.exists()) {
+        if (applicationResource.exists()) {
             try {
                 propertySources.addAfter(GENERATED_PROPERTY_SOURCE_NAME,
                         createYamlPropertySource(APPLICATIVE_PROPERTY_SOURCE_NAME, applicationResource));
@@ -162,8 +197,8 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
     @Override
     public void finished(ConfigurableApplicationContext context, Throwable exception) {
         boolean isApplicationContextLoadingFails = exception != null;
-        if(isApplicationContextLoadingFails) {
-            ContaistnerProperties properties = getDockerProperties(context);
+        if (isApplicationContextLoadingFails) {
+            ContaistnerProperties properties = getContaistnerProperties(context);
             new ContainersRemover(properties).removeContainers();
         }
     }

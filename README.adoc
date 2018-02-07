@@ -121,14 +121,30 @@ It is properties prefixed by `contaistner.services.<containerKey>` and is inspir
 
 === In memory Postgres
 
-.application-bootstrap-contaistner.yml
+.application-postgres.yml
 [source,yaml]
 ----
-include::src/test/resources/application-postgres-bootstrap-contaistner.yml[]
+contaistner:
+  application-file: classpath:application-postgres-contaistner.yml
+  services:
+    postgres-it:
+      image: postgres:10-alpine
+      ports:
+        - 5432/tcp
+      environment:
+        - POSTGRES_USER=user
+        - POSTGRES_PASSWORD=password
+        - POSTGRES_DB=db
+      tmpfs:
+        - /var/lib/postgresql/data
 ----
 
 .application-contaistner.yml
 [source,yaml]
 ----
-include::src/test/resources/application-postgres-contaistner.yml[]
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:${contaistner.services.postgres-it.bindings.5432/tcp}/db
+    username: user
+    password: password
 ----

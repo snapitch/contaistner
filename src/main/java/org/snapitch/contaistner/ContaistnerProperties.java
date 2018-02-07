@@ -105,12 +105,25 @@ public class ContaistnerProperties implements ApplicationContextAware {
         private List<String> entrypoint;
 
         /**
-         * Delay in seconds to wait after container start
+         * Configuration for detecting container readiness
          */
-        private int waitDelay = 0;
+        private Readiness readiness = new Readiness();
 
         public String[] getPortsAsArray() {
             return this.getPorts().toArray(new String[this.getPorts().size()]);
         }
+    }
+
+    @Data
+    public static class Readiness {
+        /**
+         * Minimum delay in seconds waiting container is ready.
+         */
+        private long minWaitingDelay = 0;
+
+        /**
+         * Maximum delay in seconds waiting container is ready.
+         */
+        private long maxWaitingDelay = 10;
     }
 }

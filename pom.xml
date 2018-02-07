@@ -5,7 +5,7 @@
 
 	<groupId>io.github.snapitch</groupId>
 	<artifactId>contaistner</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>contaistner</name>
@@ -64,6 +64,11 @@
 			<groupId>com.spotify</groupId>
 			<artifactId>docker-client</artifactId>
 			<version>${docker-client.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<version>3.0.0</version>
 		</dependency>
 
 		<dependency>

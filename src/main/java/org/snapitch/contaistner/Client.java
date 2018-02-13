@@ -117,18 +117,14 @@ public class Client implements Closeable {
             removeContainer(containerInfo);
 
         } catch (Exception e) {
-            LOGGER.debug("Impossible to stop container with id {}", containerId);
+            LOGGER.debug("Impossible to stop and/or remove container with id {}", containerId);
         }
     }
 
-    private void stopContainer(ContainerInfo containerInfo) {
+    private void stopContainer(ContainerInfo containerInfo) throws DockerException, InterruptedException {
         ContainerState state = containerInfo.state();
         if (state != null && state.running() != null && state.running()) {
-            try {
-                client.stopContainer(containerInfo.id(), 10);
-            } catch (Exception e) {
-                LOGGER.warn("Impossible to stop container {}", containerInfo.name());
-            }
+            client.stopContainer(containerInfo.id(), 10);
         }
     }
 

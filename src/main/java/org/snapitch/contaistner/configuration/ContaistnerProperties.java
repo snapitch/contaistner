@@ -53,10 +53,6 @@ public class ContaistnerProperties implements ApplicationContextAware {
         return services;
     }
 
-    public void setServices(Map<String, ServiceProperties> services) {
-        this.services = services;
-    }
-
     @Data
     public static class ServiceProperties {
         /**

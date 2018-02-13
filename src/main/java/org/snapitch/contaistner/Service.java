@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.snapitch.contaistner.configuration.ContaistnerProperties.ServiceProperties;
 import org.snapitch.contaistner.event.ServiceStartedEvent;
-import org.snapitch.contaistner.event.ServiceStoppedEvent;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ApplicationEventMulticaster;
 
@@ -50,12 +49,14 @@ public class Service {
     }
 
     private int getPort(List<PortBinding> portBindings) {
+        int bindingPort = -1;
+
         if (portBindings != null && !portBindings.isEmpty()) {
             final PortBinding firstBinding = portBindings.get(0);
-            return parseInt(firstBinding.hostPort());
+            bindingPort = parseInt(firstBinding.hostPort());
         }
 
-        return -1;
+        return bindingPort;
     }
 
     public void waitReadiness() {
@@ -71,7 +72,6 @@ public class Service {
     public void stop() {
         if(containerInfo != null) {
             client.stopContainer(containerInfo.id());
-            applicationEventMulticaster.multicastEvent(new ServiceStoppedEvent(this));
         }
     }
 

@@ -3,7 +3,6 @@ package org.snapitch.contaistner;
 import org.snapitch.contaistner.configuration.ContaistnerProperties;
 import org.snapitch.contaistner.configuration.ContaistnerProperties.ServiceProperties;
 import org.snapitch.contaistner.event.ServiceStartedEvent;
-import org.snapitch.contaistner.event.ServiceStoppedEvent;
 import org.snapitch.contaistner.listener.ServiceListener;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -51,7 +50,6 @@ public class ServiceContext {
 
     private void addApplicationListeners(ServiceListener listener) {
         eventMulticaster.addApplicationListener((ApplicationListener<ServiceStartedEvent>) listener::onServiceStarted);
-        eventMulticaster.addApplicationListener((ApplicationListener<ServiceStoppedEvent>) listener::onServiceStopped);
     }
 
     public Set<Service> getAllServices() {

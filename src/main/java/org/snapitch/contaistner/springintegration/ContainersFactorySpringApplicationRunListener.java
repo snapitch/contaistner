@@ -31,7 +31,7 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
         try {
             getFor(context).getAllServices().parallelStream().forEach(this::startServiceAndWaitingReadiness);
 
-            PropertiesFactory.reloadGeneratedProperties(context);
+            PropertiesFactory.loadGeneratedProperties(context);
             PropertiesFactory.loadApplicativeConfiguration(context);
 
         } catch (Exception e) {

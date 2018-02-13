@@ -13,7 +13,6 @@ import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -32,7 +31,7 @@ public class PropertiesFactory {
         return PROPERTIES.computeIfAbsent(applicationContext, PropertiesFactory::loadPropertiesFunction);
     }
 
-    public static void reloadGeneratedProperties(ConfigurableApplicationContext applicationContext) {
+    public static void loadGeneratedProperties(ConfigurableApplicationContext applicationContext) {
 
         Map<String, Object> generatedProperties = ServiceContext.getFor(applicationContext).getAllServices().stream()
                 .map(s -> s.getGeneratedProperties().entrySet())
@@ -45,11 +44,6 @@ public class PropertiesFactory {
         if (propertySource == null) {
             applicationContext.getEnvironment().getPropertySources().addFirst(
                     new MapPropertySource(GENERATED_PROPERTY_SOURCE_NAME, generatedProperties));
-
-        } else if (propertySource instanceof MapPropertySource) {
-            MapPropertySource mapPropertySource = (MapPropertySource) propertySource;
-            mapPropertySource.getSource().clear();
-            mapPropertySource.getSource().putAll(generatedProperties);
 
         } else {
             throw new IllegalStateException("Contaistner generated properties must be of type MapPropertySource");
@@ -89,11 +83,6 @@ public class PropertiesFactory {
     }
 
     private static PropertySource<?> createYamlPropertySource(String name, Resource yamlResource) throws IOException {
-        PropertySource<?> propertySource = new YamlPropertySourceLoader().load(name, yamlResource, null);
-        if (propertySource == null) {
-            LOGGER.warn("Empty {}", yamlResource);
-            propertySource = new MapPropertySource(name, new HashMap<>());
-        }
-        return propertySource;
+        return new YamlPropertySourceLoader().load(name, yamlResource, null);
     }
 }

@@ -60,16 +60,6 @@ public class ContaistnerProperties implements ApplicationContextAware {
     @Data
     public static class ServiceProperties {
         /**
-         * Container identifier
-         */
-        private String id;
-
-        /**
-         * Container name
-         */
-        private String name;
-
-        /**
          * Specify the image to start the container from. Can either be a repository/tag or a partial image ID.
          */
         private String image;

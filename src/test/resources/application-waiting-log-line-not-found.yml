@@ -10,5 +10,6 @@ contaistner:
         - POSTGRES_PASSWORD=password
         - POSTGRES_DB=db
       readiness:
-        maxWaitingDelay: 2
+        min-waiting-delay: 1
+        max-waiting-delay: 2
         waiting-log-line: unknown log

@@ -25,7 +25,9 @@ public class LogPresenceReadinessProbeServiceListener extends ReadinessProbeServ
                         properties.getReadiness().getWaitingLogLine(), service.getServiceName());
 
                 Thread thread = service.getClient()
-                        .listenLogs(properties.getId(), logLine -> isLogLinePresent(logLine, properties));
+                        .listenLogs(
+                                service.getContainerInfo().map(ci -> ci.id()).orElse(null),
+                                logLine -> isLogLinePresent(logLine, properties));
 
                 await().atMost(properties.getReadiness().getMaxWaitingDelay(), SECONDS)
                         .until(() -> !thread.isAlive());

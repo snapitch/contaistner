@@ -7,6 +7,7 @@ import com.spotify.docker.client.exceptions.DockerException;
 import com.spotify.docker.client.exceptions.ImageNotFoundException;
 import com.spotify.docker.client.messages.*;
 import lombok.extern.slf4j.Slf4j;
+import org.snapitch.contaistner.configuration.ContaistnerProperties;
 
 import java.io.Closeable;
 import java.util.*;
@@ -19,7 +20,7 @@ import static java.util.Collections.singletonList;
  * Facade for {@link DockerClient}
  */
 @Slf4j
-class Client implements Closeable {
+public class Client implements Closeable {
 
     private final DockerClient client;
 
@@ -37,7 +38,7 @@ class Client implements Closeable {
         client.close();
     }
 
-    public ContainerInfo startContainer(ContaistnerProperties.Service serviceProperties) {
+    public ContainerInfo startContainer(ContaistnerProperties.ServiceProperties serviceProperties) {
         String image = serviceProperties.getImage();
 
         try {
@@ -60,7 +61,7 @@ class Client implements Closeable {
         }
     }
 
-    private ContainerCreation createAndStartContainer(ContaistnerProperties.Service properties)
+    private ContainerCreation createAndStartContainer(ContaistnerProperties.ServiceProperties properties)
             throws DockerException, InterruptedException {
 
         ContainerCreation container = client.createContainer(
@@ -70,7 +71,7 @@ class Client implements Closeable {
         return container;
     }
 
-    private ContainerConfig createContainerProperties(ContaistnerProperties.Service properties) {
+    private ContainerConfig createContainerProperties(ContaistnerProperties.ServiceProperties properties) {
         return ContainerConfig.builder()
                 .image(properties.getImage())
                 .exposedPorts(properties.getPortsAsArray())
@@ -81,7 +82,7 @@ class Client implements Closeable {
                 .hostConfig(createHostConfig(properties)).build();
     }
 
-    private HostConfig createHostConfig(ContaistnerProperties.Service properties) {
+    private HostConfig createHostConfig(ContaistnerProperties.ServiceProperties properties) {
         return HostConfig.builder()
                 .tmpfs(createTmpFs(properties.getTmpfs()))
                 .portBindings(createPortBindings(properties)).build();
@@ -96,7 +97,7 @@ class Client implements Closeable {
         return tmpFsMap;
     }
 
-    private Map<String, List<PortBinding>> createPortBindings(ContaistnerProperties.Service properties) {
+    private Map<String, List<PortBinding>> createPortBindings(ContaistnerProperties.ServiceProperties properties) {
         final Map<String, List<PortBinding>> portBindings = new HashMap<>();
         String[] portsArray = properties.getPortsAsArray();
         if (portsArray != null) {

@@ -27,8 +27,6 @@ public class ContainersInitializerWithNoStandardYamlsTest {
 
     @Test
     public void addGeneratedPropertiesToEnvironment() {
-        assertProperty("contaistner.services.redis-it.id", notNullValue());
-        assertProperty("contaistner.services.redis-it.name", notNullValue());
         assertProperty("contaistner.services.redis-it.bindings.6379/tcp", notNullValue());
     }
 

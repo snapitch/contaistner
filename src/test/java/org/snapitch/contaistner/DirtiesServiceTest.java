@@ -2,6 +2,7 @@ package org.snapitch.contaistner;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.snapitch.contaistner.configuration.ContaistnerProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -14,7 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
-import static org.snapitch.contaistner.ContaistnerPropertiesFactory.createFromApplicationContext;
+import static org.snapitch.contaistner.PropertiesFactory.getForApplicationContext;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -41,7 +42,7 @@ public class DirtiesServiceTest {
     }
 
     private void checkServiceIdAndNameChange() {
-        ContaistnerProperties properties = createFromApplicationContext(applicationContext);
+        ContaistnerProperties properties = getForApplicationContext(applicationContext);
         if(containerId != null) {
             assertThat(properties.getServices().get("redis-it").getId(), not(containerId));
             assertThat(properties.getServices().get("redis-it").getName(), not(containerName));

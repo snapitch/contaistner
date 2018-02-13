@@ -1,5 +1,7 @@
-package org.snapitch.contaistner;
+package org.snapitch.contaistner.configuration;
 
+import org.snapitch.contaistner.springintegration.ContextClosedEventListener;
+import org.snapitch.contaistner.ServicesLogger;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +17,7 @@ public class ContaistnerAutoConfiguration {
     }
 
     @Bean
-    public ContainersLogger containersLogger() {
-        return new ContainersLogger();
+    public ServicesLogger containersLogger() {
+        return new ServicesLogger();
     }
 }

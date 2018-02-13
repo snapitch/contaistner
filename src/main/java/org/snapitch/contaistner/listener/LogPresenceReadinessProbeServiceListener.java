@@ -1,5 +1,6 @@
 package org.snapitch.contaistner.listener;
 
+import com.spotify.docker.client.messages.ContainerInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.snapitch.contaistner.Service;
 import org.snapitch.contaistner.configuration.ContaistnerProperties.ServiceProperties;
@@ -20,20 +21,18 @@ public class LogPresenceReadinessProbeServiceListener extends ReadinessProbeServ
     private boolean waitingLog(Service service) {
         try {
             ServiceProperties properties = service.getProperties();
-            if (properties.getReadiness().getWaitingLogLine() != null) {
-                LOGGER.info("Waiting log line '{}' for service {}",
-                        properties.getReadiness().getWaitingLogLine(), service.getServiceName());
+            LOGGER.info("Waiting log line '{}' for service {}",
+                    properties.getReadiness().getWaitingLogLine(), service.getServiceName());
 
-                Thread thread = service.getClient()
-                        .listenLogs(
-                                service.getContainerInfo().map(ci -> ci.id()).orElse(null),
-                                logLine -> isLogLinePresent(logLine, properties));
+            Thread thread = service.getClient()
+                    .listenLogs(
+                            service.getContainerInfo().map(ContainerInfo::id).orElse(null),
+                            logLine -> isLogLinePresent(logLine, properties));
 
-                await().atMost(properties.getReadiness().getMaxWaitingDelay(), SECONDS)
-                        .until(() -> !thread.isAlive());
+            await().atMost(properties.getReadiness().getMaxWaitingDelay(), SECONDS)
+                    .until(() -> !thread.isAlive());
 
-                LOGGER.info("Log line containing'{}' is found", properties.getReadiness().getWaitingLogLine());
-            }
+            LOGGER.info("Log line containing'{}' is found", properties.getReadiness().getWaitingLogLine());
 
             return true;
 

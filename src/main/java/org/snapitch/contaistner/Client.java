@@ -2,15 +2,17 @@ package org.snapitch.contaistner;
 
 import com.spotify.docker.client.DefaultDockerClient;
 import com.spotify.docker.client.DockerClient;
-import com.spotify.docker.client.exceptions.DockerCertificateException;
 import com.spotify.docker.client.exceptions.DockerException;
 import com.spotify.docker.client.exceptions.ImageNotFoundException;
 import com.spotify.docker.client.messages.*;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.snapitch.contaistner.configuration.ContaistnerProperties;
 
 import java.io.Closeable;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 import static com.spotify.docker.client.messages.PortBinding.randomPort;
@@ -24,13 +26,9 @@ public class Client implements Closeable {
 
     private final DockerClient client;
 
+    @SneakyThrows
     Client() {
-        try {
-            client = DefaultDockerClient.fromEnv().build();
-
-        } catch (DockerCertificateException e) {
-            throw new IllegalStateException("Unable to create docker client", e);
-        }
+        client = DefaultDockerClient.fromEnv().build();
     }
 
     @Override
@@ -38,17 +36,13 @@ public class Client implements Closeable {
         client.close();
     }
 
+    @SneakyThrows
     public ContainerInfo startContainer(ContaistnerProperties.ServiceProperties serviceProperties) {
         String image = serviceProperties.getImage();
 
-        try {
-            pullImage(image);
-            ContainerCreation container = createAndStartContainer(serviceProperties);
-            return client.inspectContainer(container.id());
-
-        } catch (Exception e) {
-            throw new IllegalStateException("Impossible to start container " + image, e);
-        }
+        pullImage(image);
+        ContainerCreation container = createAndStartContainer(serviceProperties);
+        return client.inspectContainer(container.id());
     }
 
     private void pullImage(String image) throws DockerException, InterruptedException {
@@ -123,33 +117,23 @@ public class Client implements Closeable {
             removeContainer(containerInfo);
 
         } catch (Exception e) {
-            LOGGER.debug("No container existing with id {}", containerId);
+            LOGGER.debug("Impossible to stop container with id {}", containerId);
         }
     }
 
     private void stopContainer(ContainerInfo containerInfo) {
-        try {
-            ContainerState state = containerInfo.state();
-            if (state != null && state.running() != null && state.running()) {
-                try {
-                    client.stopContainer(containerInfo.id(), 10);
-                } catch (Exception e) {
-                    LOGGER.warn("Impossible to stop container {}", containerInfo.name());
-                }
+        ContainerState state = containerInfo.state();
+        if (state != null && state.running() != null && state.running()) {
+            try {
+                client.stopContainer(containerInfo.id(), 10);
+            } catch (Exception e) {
+                LOGGER.warn("Impossible to stop container {}", containerInfo.name());
             }
-
-        } catch (Exception e) {
-            LOGGER.warn("Impossible to stop container {}", containerInfo.name());
         }
     }
 
-    private void removeContainer(ContainerInfo containerInfo) {
-        try {
-            client.removeContainer(containerInfo.id());
-
-        } catch (Exception e) {
-            LOGGER.warn("Impossible to remove container {}", containerInfo.name());
-        }
+    private void removeContainer(ContainerInfo containerInfo) throws DockerException, InterruptedException {
+        client.removeContainer(containerInfo.id());
     }
 
     public Thread listenLogs(String containerId, Consumer<String> logConsumer) {

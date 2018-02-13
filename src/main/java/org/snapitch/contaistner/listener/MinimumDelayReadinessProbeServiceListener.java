@@ -1,5 +1,6 @@
 package org.snapitch.contaistner.listener;
 
+import lombok.SneakyThrows;
 import org.snapitch.contaistner.Service;
 import org.snapitch.contaistner.configuration.ContaistnerProperties.ServiceProperties;
 
@@ -14,11 +15,9 @@ public class MinimumDelayReadinessProbeServiceListener extends ReadinessProbeSer
         }
     }
 
+    @SneakyThrows
     private Boolean waitMinimumDelay(ServiceProperties properties) {
-        try {
-            Thread.sleep(properties.getReadiness().getMinWaitingDelay() * 1000L);
-        } catch (Exception ignored) {
-        }
+        Thread.sleep(properties.getReadiness().getMinWaitingDelay() * 1000L);
         return true;
     }
 }

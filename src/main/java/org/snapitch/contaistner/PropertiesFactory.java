@@ -1,5 +1,6 @@
 package org.snapitch.contaistner;
 
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.snapitch.contaistner.configuration.ContaistnerProperties;
 import org.snapitch.contaistner.configuration.ContaistnerProperties.ServiceProperties;
@@ -38,16 +39,8 @@ public class PropertiesFactory {
                 .flatMap(Collection::stream)
                 .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        PropertySource<?> propertySource = applicationContext.getEnvironment().getPropertySources()
-                .get(GENERATED_PROPERTY_SOURCE_NAME);
-
-        if (propertySource == null) {
-            applicationContext.getEnvironment().getPropertySources().addFirst(
-                    new MapPropertySource(GENERATED_PROPERTY_SOURCE_NAME, generatedProperties));
-
-        } else {
-            throw new IllegalStateException("Contaistner generated properties must be of type MapPropertySource");
-        }
+        applicationContext.getEnvironment().getPropertySources().addFirst(
+                new MapPropertySource(GENERATED_PROPERTY_SOURCE_NAME, generatedProperties));
 
         PROPERTIES.put(applicationContext, loadPropertiesFunction(applicationContext));
     }
@@ -66,19 +59,15 @@ public class PropertiesFactory {
         return getForApplicationContext(applicationContext).getServices().get(serviceName);
     }
 
+    @SneakyThrows
     public static void loadApplicativeConfiguration(ConfigurableApplicationContext applicationContext) {
         ContaistnerProperties properties = PropertiesFactory.getForApplicationContext(applicationContext);
 
         Resource applicationResource = properties.getApplicationResource();
         if (applicationResource.exists()) {
-            try {
-                applicationContext.getEnvironment().getPropertySources().addFirst(
-                        createYamlPropertySource(APPLICATIVE_PROPERTY_SOURCE_NAME, applicationResource));
+            applicationContext.getEnvironment().getPropertySources().addFirst(
+                    createYamlPropertySource(APPLICATIVE_PROPERTY_SOURCE_NAME, applicationResource));
 
-            } catch (Exception e) {
-                throw new IllegalStateException(
-                        "Impossible to load applicative configuration from " + applicationResource.toString(), e);
-            }
         }
     }
 

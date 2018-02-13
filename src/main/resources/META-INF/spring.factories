@@ -1,8 +1,14 @@
 org.springframework.boot.SpringApplicationRunListener=\
-org.snapitch.contaistner.ContainersFactorySpringApplicationRunListener
+org.snapitch.contaistner.springintegration.ContainersFactorySpringApplicationRunListener
 
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-org.snapitch.contaistner.ContaistnerAutoConfiguration
+org.snapitch.contaistner.configuration.ContaistnerAutoConfiguration
 
 org.springframework.test.context.TestExecutionListener=\
-org.snapitch.contaistner.DirtiesContainerTestExecutionListener
+org.snapitch.contaistner.springintegration.DirtiesServiceTestExecutionListener
+
+org.snapitch.contaistner.listener.ServiceListener=\
+org.snapitch.contaistner.listener.LoggingServiceListener,\
+org.snapitch.contaistner.listener.PortsAccessibilityReadinessProbeServiceListener,\
+org.snapitch.contaistner.listener.MinimumDelayReadinessProbeServiceListener,\
+org.snapitch.contaistner.listener.LogPresenceReadinessProbeServiceListener

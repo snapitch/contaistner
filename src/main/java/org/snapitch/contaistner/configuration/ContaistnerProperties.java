@@ -1,4 +1,4 @@
-package org.snapitch.contaistner;
+package org.snapitch.contaistner.configuration;
 
 import lombok.Data;
 import org.springframework.beans.BeansException;
@@ -27,7 +27,7 @@ public class ContaistnerProperties implements ApplicationContextAware {
     /**
      * Configuration of containers
      */
-    private Map<String, Service> services = new HashMap<>();
+    private Map<String, ServiceProperties> services = new HashMap<>();
 
     public Resource getApplicationResource() {
         return applicationContext.getResource(applicationFile);
@@ -49,26 +49,12 @@ public class ContaistnerProperties implements ApplicationContextAware {
         this.applicationFile = applicationFile;
     }
 
-    public Map<String, Service> getServices() {
+    public Map<String, ServiceProperties> getServices() {
         return services;
     }
 
-    public void setServices(Map<String, Service> services) {
-        this.services = services;
-    }
-
     @Data
-    public static class Service {
-        /**
-         * Container identifier
-         */
-        private String id;
-
-        /**
-         * Container name
-         */
-        private String name;
-
+    public static class ServiceProperties {
         /**
          * Specify the image to start the container from. Can either be a repository/tag or a partial image ID.
          */

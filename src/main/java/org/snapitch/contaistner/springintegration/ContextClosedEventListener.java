@@ -1,6 +1,7 @@
-package org.snapitch.contaistner;
+package org.snapitch.contaistner.springintegration;
 
 import lombok.RequiredArgsConstructor;
+import org.snapitch.contaistner.ServiceContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.event.ContextClosedEvent;
@@ -12,6 +13,6 @@ public class ContextClosedEventListener implements ApplicationListener<ContextCl
 
     @Override
     public void onApplicationEvent(ContextClosedEvent event) {
-        new ContainersRemover(applicationContext).removeContainers();
+        ServiceContext.deleteFor(applicationContext);
     }
 }

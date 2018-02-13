@@ -1,5 +1,6 @@
 package org.snapitch.contaistner;
 
+import com.spotify.docker.client.messages.ContainerInfo;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
-import static org.snapitch.contaistner.ContaistnerPropertiesFactory.createFromApplicationContext;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -41,13 +41,13 @@ public class DirtiesServiceTest {
     }
 
     private void checkServiceIdAndNameChange() {
-        ContaistnerProperties properties = createFromApplicationContext(applicationContext);
+        Service service = ServiceContext.getFor(applicationContext).getServiceByName("redis-it");
         if(containerId != null) {
-            assertThat(properties.getServices().get("redis-it").getId(), not(containerId));
-            assertThat(properties.getServices().get("redis-it").getName(), not(containerName));
+            assertThat(service.getContainerInfo().map(ContainerInfo::id).orElse(null), not(containerId));
+            assertThat(service.getContainerInfo().map(ContainerInfo::name).orElse(null), not(containerName));
         } else {
-            containerId = properties.getServices().get("redis-it").getId();
-            containerName = properties.getServices().get("redis-it").getName();
+            containerId = service.getContainerInfo().map(ContainerInfo::id).orElse(null);
+            containerName = service.getContainerInfo().map(ContainerInfo::name).orElse(null);
         }
     }
 

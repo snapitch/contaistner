@@ -1,8 +1,8 @@
 package org.snapitch.contaistner;
 
-import com.google.common.collect.ImmutableMap;
 import com.spotify.docker.client.messages.ContainerInfo;
 import com.spotify.docker.client.messages.PortBinding;
+import com.spotify.docker.client.shaded.com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.snapitch.contaistner.configuration.ContaistnerProperties.ServiceProperties;

@@ -39,21 +39,28 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
         }
     }
 
-    private void startServiceAndWaitingReadiness(Service service) {
-        service.start();
-        service.waitReadiness();
-    }
-
     @Override
     public void contextLoaded(ConfigurableApplicationContext context) {
 
     }
 
     @Override
-    public void finished(ConfigurableApplicationContext context, Throwable exception) {
-        boolean isApplicationContextLoadingFails = exception != null;
-        if (isApplicationContextLoadingFails) {
-            ServiceContext.deleteFor(context);
-        }
+    public void started(ConfigurableApplicationContext context) {
+
+    }
+
+    @Override
+    public void running(ConfigurableApplicationContext context) {
+
+    }
+
+    @Override
+    public void failed(ConfigurableApplicationContext context, Throwable exception) {
+        ServiceContext.deleteFor(context);
+    }
+
+    private void startServiceAndWaitingReadiness(Service service) {
+        service.start();
+        service.waitReadiness();
     }
 }

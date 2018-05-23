@@ -4,8 +4,8 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.snapitch.contaistner.configuration.ContaistnerProperties;
 import org.snapitch.contaistner.configuration.ContaistnerProperties.ServiceProperties;
-import org.springframework.boot.bind.PropertySourcesPropertyValues;
-import org.springframework.boot.bind.RelaxedDataBinder;
+import org.springframework.boot.context.properties.bind.Bindable;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.env.MapPropertySource;
@@ -14,6 +14,7 @@ import org.springframework.core.io.Resource;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -46,10 +47,9 @@ public class PropertiesFactory {
     }
 
     private static ContaistnerProperties loadPropertiesFunction(ConfigurableApplicationContext applicationContext) {
-        ContaistnerProperties properties = new ContaistnerProperties();
+        Binder binder = Binder.get(applicationContext.getEnvironment());
+        ContaistnerProperties properties = binder.bind(PROPERTIES_PREFIX, Bindable.of(ContaistnerProperties.class)).get();
         properties.setApplicationContext(applicationContext);
-        RelaxedDataBinder dataBinder = new RelaxedDataBinder(properties, PROPERTIES_PREFIX);
-        dataBinder.bind(new PropertySourcesPropertyValues(applicationContext.getEnvironment().getPropertySources()));
         return properties;
     }
 
@@ -65,13 +65,13 @@ public class PropertiesFactory {
 
         Resource applicationResource = properties.getApplicationResource();
         if (applicationResource.exists()) {
-            applicationContext.getEnvironment().getPropertySources().addFirst(
-                    createYamlPropertySource(APPLICATIVE_PROPERTY_SOURCE_NAME, applicationResource));
+            createYamlPropertySource(APPLICATIVE_PROPERTY_SOURCE_NAME, applicationResource)
+                    .forEach(applicationContext.getEnvironment().getPropertySources()::addFirst);
 
         }
     }
 
-    private static PropertySource<?> createYamlPropertySource(String name, Resource yamlResource) throws IOException {
-        return new YamlPropertySourceLoader().load(name, yamlResource, null);
+    private static List<PropertySource<?>> createYamlPropertySource(String name, Resource yamlResource) throws IOException {
+        return new YamlPropertySourceLoader().load(name, yamlResource);
     }
 }

@@ -1,6 +1,7 @@
 package org.snapitch.contaistner;
 
 import com.spotify.docker.client.messages.ContainerInfo;
+import com.spotify.docker.client.messages.NetworkSettings;
 import com.spotify.docker.client.messages.PortBinding;
 import com.spotify.docker.client.shaded.com.google.common.collect.ImmutableMap;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,9 @@ public class Service {
     public Map<String, String> getGeneratedProperties() {
         HashMap<String, String> properties = new HashMap<>();
         if(containerInfo != null) {
-            ImmutableMap<String, List<PortBinding>> ports = containerInfo.networkSettings().ports();
+            NetworkSettings networkSettings = containerInfo.networkSettings();
+            properties.put(PROPERTIES_PREFIX + ".services." + serviceName + ".ipAddress", networkSettings.ipAddress());
+            ImmutableMap<String, List<PortBinding>> ports = networkSettings.ports();
             if (ports != null) {
                 for (String port : ports.keySet()) {
                     int bindingPort = getPort(ports.get(port));

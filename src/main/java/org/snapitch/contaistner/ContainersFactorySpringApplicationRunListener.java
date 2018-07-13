@@ -2,6 +2,7 @@ package org.snapitch.contaistner;
 
 import com.google.common.collect.ImmutableMap;
 import com.spotify.docker.client.messages.ContainerInfo;
+import com.spotify.docker.client.messages.NetworkSettings;
 import com.spotify.docker.client.messages.PortBinding;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
@@ -109,16 +110,19 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
                                         String containerKey,
                                         ContainerInfo containerInfo) {
 
+        NetworkSettings networkSettings = containerInfo.networkSettings();
+
         properties.put(PROPERTIES_PREFIX + ".services." + containerKey + ".id", containerInfo.id());
         properties.put(PROPERTIES_PREFIX + ".services." + containerKey + ".name", containerInfo.name());
-        addGeneratedBindingPortProperties(properties, containerKey, containerInfo);
+        properties.put(PROPERTIES_PREFIX + ".services." + containerKey + networkSettings, networkSettings.ipAddress());
+        addGeneratedBindingPortProperties(properties, containerKey, networkSettings);
     }
 
     private void addGeneratedBindingPortProperties(Properties properties,
                                                    String containerKey,
-                                                   ContainerInfo containerInfo) {
+                                                   NetworkSettings networkSettings) {
 
-        ImmutableMap<String, List<PortBinding>> ports = containerInfo.networkSettings().ports();
+        ImmutableMap<String, List<PortBinding>> ports = networkSettings.ports();
         if(ports != null) {
             for (String port : ports.keySet()) {
                 int bindingPort = getPort(ports.get(port));

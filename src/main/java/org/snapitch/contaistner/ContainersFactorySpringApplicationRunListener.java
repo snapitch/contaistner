@@ -114,7 +114,7 @@ public class ContainersFactorySpringApplicationRunListener implements SpringAppl
 
         properties.put(PROPERTIES_PREFIX + ".services." + containerKey + ".id", containerInfo.id());
         properties.put(PROPERTIES_PREFIX + ".services." + containerKey + ".name", containerInfo.name());
-        properties.put(PROPERTIES_PREFIX + ".services." + containerKey + networkSettings, networkSettings.ipAddress());
+        properties.put(PROPERTIES_PREFIX + ".services." + containerKey + ".ipAddress", networkSettings.ipAddress());
         addGeneratedBindingPortProperties(properties, containerKey, networkSettings);
     }
 

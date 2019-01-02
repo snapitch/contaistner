@@ -48,7 +48,7 @@ public class PropertiesFactory {
 
     private static ContaistnerProperties loadPropertiesFunction(ConfigurableApplicationContext applicationContext) {
         Binder binder = Binder.get(applicationContext.getEnvironment());
-        ContaistnerProperties properties = binder.bind(PROPERTIES_PREFIX, Bindable.of(ContaistnerProperties.class)).get();
+        ContaistnerProperties properties = binder.bind(PROPERTIES_PREFIX, Bindable.of(ContaistnerProperties.class)).orElseGet(ContaistnerProperties::new);
         properties.setApplicationContext(applicationContext);
         return properties;
     }

@@ -25,7 +25,7 @@ public class LogsListener {
     public void listenLogs() {
         try {
             LogStream logStream = client.attachContainer(containerId, LOGS, STREAM, STDOUT, STDERR);
-            StringBuilder logs = new StringBuilder("");
+            StringBuilder logs = new StringBuilder();
             while (true) {
                 LogMessage next = logStream.next();
                 ByteBuffer content = next.content();
@@ -35,9 +35,9 @@ public class LogsListener {
 
                 String[] logLines = logs.toString().split("\n");
 
-                if (logLines.length > 1) {
-                    List<String> finishedLogsLines = asList(Arrays.copyOfRange(logLines, 0, logLines.length - 1));
-                    logs = new StringBuilder(logLines[logLines.length - 1]);
+                if (logLines.length > 0) {
+                    List<String> finishedLogsLines = asList(Arrays.copyOfRange(logLines, 0, logLines.length));
+                    logs = new StringBuilder();
 
                     if (!finishedLogsLines.isEmpty()) {
                         for (String finishedLogsLine : finishedLogsLines) {
